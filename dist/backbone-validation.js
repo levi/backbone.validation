@@ -26,11 +26,20 @@ Backbone.Validation = (function(_){
 
   var Validation = (function(){
 
+    // Helper function to get a value from a Backbone object as a property
+    // or as a function.
+    var getValue = function(object, prop) {
+      if (!(object && object[prop])) {
+        return null;
+      }
+      return _.isFunction(object[prop]) ? object[prop]() : object[prop];
+    };
+
     // Returns an object with undefined properties for all
     // attributes on the model that has defined one or more
     // validation rules.
     var getValidatedAttrs = function(model) {
-      return _.reduce(_.keys(model.validation || {}), function(memo, key) {
+      return _.reduce(_.keys(getValue(model, 'validation') || {}), function(memo, key) {
         memo[key] = void 0;
         return memo;
       }, {});
@@ -40,7 +49,7 @@ Backbone.Validation = (function(_){
     // attribute. Returns an array of any validators defined,
     // or an empty array if none is defined.
     var getValidators = function(model, attr) {
-      var attrValidationSet = model.validation ? model.validation[attr] || {} : {};
+      var attrValidationSet = getValue(model, 'validation') ? getValue(model, 'validation')[attr] || {} : {};
 
       // If the validator is a function or a string, wrap it in a function validator
       if (_.isFunction(attrValidationSet) || _.isString(attrValidationSet)) {
